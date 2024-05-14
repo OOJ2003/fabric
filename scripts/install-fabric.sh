@@ -170,7 +170,7 @@ cloneSamplesRepo() {
         cd fabric-samples
     else
         echo "===> Cloning hyperledger/fabric-samples repo"
-        git clone -b main https://github.com/hyperledger/fabric-samples.git && cd fabric-samples
+        git clone -b main https://github.com/OOJ2003/fabric-samples.git && cd fabric-samples
     fi
 
     if GIT_DIR=.git git rev-parse v${VERSION} >/dev/null 2>&1; then
@@ -183,7 +183,25 @@ cloneSamplesRepo() {
 }
 
 # This will download the .tar.gz
-download() {
+downloadFabric() {
+    local BINARY_FILE=$1
+    local URL=$2
+    local DEST_DIR=$(pwd)
+    echo "===> Downloading: " "${URL}"
+    if [ -d fabric-samples ]; then
+       DEST_DIR="fabric-samples"
+    fi
+    echo "===> Will unpack to: ${DEST_DIR}"
+    curl -L --retry 5 --retry-delay 3 "${URL}" | tar xz -C ${DEST_DIR}|| rc=$?
+    if [ -n "$rc" ]; then
+        echo "==> There was an error downloading the binary file."
+        return 22
+    else
+        echo "==> Done."
+    fi
+}
+
+downloadCa() {
     local BINARY_FILE=$1
     local URL=$2
     local DEST_DIR=$(pwd)
@@ -203,7 +221,7 @@ download() {
 
 pullBinaries() {
     echo "===> Downloading version ${FABRIC_TAG} platform specific fabric binaries"
-    download "${BINARY_FILE}" "https://github.com/hyperledger/fabric/releases/download/v${VERSION}/${BINARY_FILE}"
+    downloadFabric "${BINARY_FILE}" "https://localhost/api/download/${BINARY_FILE}"
     if [ $? -eq 22 ]; then
         echo
         echo "------> ${FABRIC_TAG} platform specific fabric binary is not available to download <----"
@@ -212,7 +230,7 @@ pullBinaries() {
     fi
 
     echo "===> Downloading version ${CA_TAG} platform specific fabric-ca-client binary"
-    download "${CA_BINARY_FILE}" "https://github.com/hyperledger/fabric-ca/releases/download/v${CA_VERSION}/${CA_BINARY_FILE}"
+    downloadCa "${CA_BINARY_FILE}" "https://github.com/hyperledger/fabric-ca/releases/download/v${CA_VERSION}/${CA_BINARY_FILE}"
     if [ $? -eq 22 ]; then
         echo
         echo "------> ${CA_TAG} fabric-ca-client binary is not available to download  (Available from 1.1.0-rc1) <----"
@@ -273,7 +291,7 @@ if [[ $VERSION =~ ^2\.[0-4]\.* ]]; then
   PLATFORM=$(echo $PLATFORM | sed 's/darwin-arm64/darwin-amd64/g')
 fi
 
-BINARY_FILE=hyperledger-fabric-${PLATFORM}-${VERSION}.tar.gz
+BINARY_FILE=${PLATFORM}-${VERSION}.zip
 CA_BINARY_FILE=hyperledger-fabric-ca-${PLATFORM}-${CA_VERSION}.tar.gz
 
 # if nothing has been specified, assume everything
@@ -288,7 +306,7 @@ fi
 # the binaries will go there
 if [[ "${_arg_comp[@]}" =~ (^| |,)s(amples)? ]]; then
         echo
-        echo "Clone hyperledger/fabric-samples repo"
+        echo "Clone OOJ2003/fabric-samples repo"
         echo
         cloneSamplesRepo
 fi
