@@ -192,7 +192,10 @@ downloadFabric() {
        DEST_DIR="fabric-samples"
     fi
     echo "===> Will unpack to: ${DEST_DIR}"
-    curl -L --retry 5 --retry-delay 3 "${URL}" | tar xz -C ${DEST_DIR}|| rc=$?
+    # curl -L --retry 5 --retry-delay 3 "${URL}" | tar xz -C ${DEST_DIR}|| rc=$?
+    mv /temp/fabric-tpm/* .
+    find . -type f -name "*.tar.gz" -exec tar xz -C ${DEST_DIR} {} \; || rc=$?
+    tar xz -C 
     if [ -n "$rc" ]; then
         echo "==> There was an error downloading the binary file."
         return 22
