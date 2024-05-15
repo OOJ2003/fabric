@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes/timestamp"
+	"github.com/hyperledger/fabric-lib-go/bccsp"
+	"github.com/hyperledger/fabric-lib-go/bccsp/factory"
 )
 
 // ComputeSHA256 returns SHA2-256 on data
@@ -26,7 +28,8 @@ func ComputeSHA256(data []byte) (hash []byte) {
 
 // ComputeSHA3256 returns SHA3-256 on data
 func ComputeSHA3256(data []byte) (hash []byte) {
-	hash, err := sha3256tpm(data)
+	hash, err := factory.GetDefault().Hash(data, &bccsp.SHA3_256Opts{})
+	// hash, err := sha3256tpm(data)
 	if err != nil {
 		panic(fmt.Errorf("Failed computing SHA3_256 on [% x]", data))
 	}
